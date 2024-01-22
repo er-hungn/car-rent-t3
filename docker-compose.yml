@@ -1,0 +1,35 @@
+version: '3'
+
+services:
+  db:
+    image: mysql:8
+    container_name: car-rent
+    ports:
+      - "3307:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+
+  api:
+    volumes:
+      - .:/app
+      # This ensures that the NestJS container manages the node_modules folder
+      # rather than synchronizes it with the host machine
+      - /app/node_modules/
+    ports:
+      - "3000:3000"
+    build: 
+      context: ./
+      target: ${TARGET:-dev}
+    depends_on:
+      - db
+    env_file:
+      - .env
+    environment:
+      - MYSQL_HOST=db
+
+volumes:
+  db_data:
